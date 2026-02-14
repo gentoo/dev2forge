@@ -70,6 +70,22 @@ class CodebergAPI:
         # https://codeberg.org/api/swagger#/repository/repoGetPullRequestCommits
         return self.session.get(f"{self.repos_baseurl}/pulls/{pr_id}/commits").json()
 
+    def commit_statuses(self, sha):
+        # /repos/{owner}/{repo}/statuses/{sha}
+        return self.session.get(f"{self.repos_baseurl}/statuses/{sha}").json()
+
+    def commit_set_status(
+        self, sha, state, description=None, target_url=None, context=None
+    ):
+        # /repos/{owner}/{repo}/statuses/{sha}
+        body = {
+            "context": context,
+            "state": state,
+            "description": description,
+            "target_url": target_url,
+        }
+        self.session.post(f"{self.repos_baseurl}/statuses/{sha}", json=body)
+
     def files(self, pr_id: int) -> list[dict]:
         return self.session.get(f"{self.repos_baseurl}/pulls/{pr_id}/files").json()
 
