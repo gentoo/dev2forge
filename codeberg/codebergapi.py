@@ -74,7 +74,7 @@ class CodebergAPI:
 
     def commits(self, pr_id: int) -> Generator[None, dict, None]:
         # https://codeberg.org/api/swagger#/repository/repoGetPullRequestCommits
-        return self._get_paginated(f"{self.repos_baseurl}/pulls/{pr_id}/commits", limit=1)
+        return self._get_paginated(f"{self.repos_baseurl}/pulls/{pr_id}/commits")
 
     def commit_statuses(self, sha) -> Generator[None, dict, None]:
         # /repos/{owner}/{repo}/statuses/{sha}
