@@ -109,6 +109,15 @@ class CodebergAPI:
     def delete_comment(self, comment_id: int) -> None:
         self.session.delete(f"{self.repos_baseurl}/issues/comments/{comment_id}")
 
+    def request_review(
+        self, pr_id, reviewers: list[str] = [], team_reviewers: list[str] = []
+    ) -> None:
+        # https://codeberg.org/api/swagger#/repository/repoCreatePullReviewRequests
+        self.session.post(
+            f"{self.repos_baseurl}/pulls/{pr_id}/requested_reviewers",
+            json={"reviewers": reviewers, "team_reviewers": team_reviewers},
+        )
+
     def teams(self, org: str) -> Generator[None, dict, None]:
         # https://codeberg.org/api/swagger#/organization/orgListTeams
         #
