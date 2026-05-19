@@ -33,6 +33,11 @@ def main(devs_json="devs.json"):
         remaining = set(m["login"] for m in cb.org_members(ORG))
         revmap = dict((v, k) for k, v in devs.items())
 
+        for t in cb.teams(ORG):
+            if t["name"] == "Owners":
+                protected = frozenset(m["login"] for m in cb.team_members(t["id"]))
+                break
+
         for cbdev, dev in revmap.items():
             if not cbdev:
                 continue
@@ -42,6 +47,12 @@ def main(devs_json="devs.json"):
                 print(f"INVITE {cbdev} ({dev})")
                 cb.team_add_member(team_id, cbdev)
         for m in remaining:
+            if m in protected:
+                # Never remove owners during automatic ldap sync. Messing up here can
+                # lock everyone out.
+                raise RuntimeError(f'!!!refusing to remove organization owner {m}!!!\n\n'
+                                   'Double-check that no mistake was made, and if necessary, manually '
+                                   'remove via the web UI before continuing.')
             print(f"REMOVE {m}")
             cb.org_remove_member(ORG, m)
 
