@@ -5,6 +5,15 @@ from urllib3.util import Retry
 from requests.adapters import HTTPAdapter
 
 
+class TimeoutHTTPAdapter(HTTPAdapter):
+
+    def send(self, request, **kwargs):
+        timeout = kwargs.get("timeout")
+        if timeout is None:
+            kwargs["timeout"] = 5
+        return super().send(request, **kwargs)
+
+
 class CodebergAPI:
     def __init__(self, owner: str, repo: str, token: str):
         self.owner = owner
@@ -25,6 +34,7 @@ class CodebergAPI:
         self.session.hooks = {
             "response": lambda r, *args, **kwargs: r.raise_for_status()
         }
+        self.session.mount("https://", TimeoutHTTPAdapter())
         return self
 
     def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
@@ -42,14 +52,14 @@ class CodebergAPI:
     def teams_baseurl(self) -> str:
         return "https://codeberg.org/api/v1/teams"
 
-    def _get_paginated(self, url) -> Generator[None, dict, None]:
-        r = self.session.get(url, params={"limit": 100})
+    def _get_paginated(self, url, timeout=None) -> Generator[None, dict, None]:
+        r = self.session.get(url, params={"limit": 100}, timeout=timeout)
         yield from r.json()
         if "next" not in r.links:
             return
         next_url = r.links["next"]["url"]
         while True:
-            r = self.session.get(next_url)
+            r = self.session.get(next_url, timeout=timeout)
             yield from r.json()
             if "next" not in r.links:
                 break
@@ -59,7 +69,7 @@ class CodebergAPI:
         """
         state must be one of: open, closed, all
         """
-        return self._get_paginated(f"{self.repos_baseurl}/pulls?state={state}")
+        return self._get_paginated(f"{self.repos_baseurl}/pulls?state={state}", timeout=61)
 
     def set_pr_title(self, pr_id: int, title: str) -> None:
         self.session.patch(f"{self.repos_baseurl}/pulls/{pr_id}", json={"title": title})
