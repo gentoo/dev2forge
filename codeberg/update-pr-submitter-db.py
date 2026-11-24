@@ -25,7 +25,7 @@ def main(proxied_maints_json="proxied-maints.json"):
 
     with CodebergAPI("gentoo", "gentoo", api_token) as cb:
         for pr in cb.pulls(state="all"):
-            print(f"PR #{pr['number']:04d}", end="")
+            print(f"PR #{pr['number']:04d}", end=" ", flush=True)
 
             pr_user = pr["user"]["login"]
             if pr_user not in maints.values():
@@ -47,6 +47,7 @@ def main(proxied_maints_json="proxied-maints.json"):
                     # author fields to a user name. Prefer suggesting
                     # the committer email matched to the PR submitter
                     # login over the author email
+                    print()
                     print(pr["html_url"])
                     print(pr["patch_url"])
                     print(f"PR #{pr['number']}: commit not matched to a user")
@@ -67,6 +68,7 @@ def main(proxied_maints_json="proxied-maints.json"):
                     # In this case: committer, author, and PR
                     # submitter are all matched to three different
                     # Codeberg users.
+                    print()
                     print(pr["html_url"])
                     print(pr["patch_url"])
                     print(
