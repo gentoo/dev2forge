@@ -94,7 +94,7 @@ def main(proxied_maints_json="proxied-maints.json"):
                         if escape:
                             continue
                     maints[attributed_c["email"]] = attributed["login"]
-        except requests.exceptions.HTTPError:
+        except requests.exceptions.HTTPError, requests.exceptions.RetryError:
             import traceback
             traceback.print_exc()
             print('dumping found records')

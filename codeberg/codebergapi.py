@@ -1,6 +1,9 @@
 import requests
 from typing import Generator
 
+from urllib3.util import Retry
+from requests.adapters import HTTPAdapter
+
 
 class CodebergAPI:
     def __init__(self, owner: str, repo: str, token: str):
@@ -10,6 +13,9 @@ class CodebergAPI:
 
     def __enter__(self):
         self.session = requests.Session()
+        retries = Retry(total=3, backoff_factor=0.5, allowed_methods=None, status_forcelist=[502, 503, 504])
+        self.session.mount('https://', HTTPAdapter(max_retries=retries))
+
         self.session.headers.update(
             {
                 "Authorization": f"token {self.token}",
