@@ -53,6 +53,9 @@ def main(proxied_maints_json="proxied-maints.json"):
                     print(f"PR #{pr['number']}: commit not matched to a user")
                     attributed = pr["user"]
                     attributed_c = c1["commit"]["committer"]
+                    if attributed['login'] == 'Ghost':
+                        # Deleted user
+                        continue
                     print(
                         f"{attributed_c['email']} ({attributed_c['name']}) -> {attributed['login']} ({attributed['full_name']})"
                     )
