@@ -22,8 +22,6 @@ class CodebergAPI:
 
     def __enter__(self):
         self.session = requests.Session()
-        retries = Retry(total=3, backoff_factor=0.5, allowed_methods=None, status_forcelist=[502, 503, 504])
-        self.session.mount('https://', HTTPAdapter(max_retries=retries))
 
         self.session.headers.update(
             {
@@ -34,7 +32,8 @@ class CodebergAPI:
         self.session.hooks = {
             "response": lambda r, *args, **kwargs: r.raise_for_status()
         }
-        self.session.mount("https://", TimeoutHTTPAdapter())
+        retries = Retry(total=3, backoff_factor=0.5, allowed_methods=None, status_forcelist=[502, 503, 504])
+        self.session.mount("https://", TimeoutHTTPAdapter(max_retries=retries))
         return self
 
     def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
